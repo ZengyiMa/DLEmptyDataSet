@@ -76,6 +76,23 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGFloat)spaceOfImageAndTitleForEmptyDataSet:(UIScrollView *)scrollView;
 
+
+/**
+ 是否对空白视图打开交互 (默认为 NO)
+
+ @param scrollView 当前的 scrollView
+ @return YES 为打开，NO 为关闭
+ */
+- (BOOL)enableUserInteractionForEmptyDataSet:(UIScrollView *)scrollView;
+
+/**
+ 是否忽略 contentInset (默认为 YES)
+ 
+ @param scrollView 当前的 scrollView
+ @return YES 为打开，NO 为关闭
+ */
+- (BOOL)ignoreContentInsetForEmptyDataSet:(UIScrollView *)scrollView;
+
 @end
 
 
@@ -85,6 +102,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<DLEmptyDataSetDelegate> dataSetDelegate;
 
 - (void)reloadDataWithEmptyView;
+- (void)reloadDataWithEmptyView:(BOOL)reloadData;
+
 
 @end
 

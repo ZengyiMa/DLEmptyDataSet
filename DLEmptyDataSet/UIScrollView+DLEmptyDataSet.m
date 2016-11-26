@@ -132,37 +132,41 @@ static char kDLEmptyDelegateKey;
 
 - (void)reloadDataWithEmptyView
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if ([self isKindOfClass:[UITableView class]]) {
-            [((UITableView *)self) reloadData];
-            if ([self dataSetIsEmptyWithTableView:(UITableView *)self]) {
-                // 数据源为空
-                [self dl_displayEmptyView:YES];
-            }
-            else
-            {
-                [self dl_displayEmptyView:NO];
-            }
-        }
-    });
+    [self reloadDataWithEmptyView:YES];
 }
 
-
-
-
-
-
-
+- (void)reloadDataWithEmptyView:(BOOL)reloadData
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        BOOL showEmptyView = NO;
+        if ([self isKindOfClass:[UITableView class]]) {
+            if (reloadData) {
+                [((UITableView *)self) reloadData];
+            }
+            
+            showEmptyView = [self dataSetIsEmptyWithTableView:(UITableView *)self];
+            
+          }
+        else if([self isKindOfClass:[UICollectionView class]])
+        {
+            if (reloadData) {
+                 [((UICollectionView *)self) reloadData];
+            }
+            showEmptyView = [self dataSetIsEmptyWithCollectionView:(UICollectionView *)self];
+        }
+        [self dl_displayEmptyView:showEmptyView];
+    });
+}
 
 
 - (void)dl_displayEmptyView:(BOOL)display
 {
     if (display) {
         
-        UIView *emptyView = nil;
-        if ([self.dataSetDelegate respondsToSelector:@selector(viewForEmptyDataSet:)]) {
+        UIView *emptyView = [self.dataSetDelegate respondsToSelector:@selector(viewForEmptyDataSet:)] ?
+                                                    [self.dataSetDelegate viewForEmptyDataSet:self] : nil;
+        if (emptyView) {
             // custom view
-            emptyView = [self.dataSetDelegate viewForEmptyDataSet:self];
         }
         else
         {
@@ -203,13 +207,21 @@ static char kDLEmptyDelegateKey;
             }
         }
         
-        
-        
         [[self dl_emptyView] removeFromSuperview];
         [self dl_setEmptyView:emptyView];
         if (emptyView) {
             emptyView.hidden = NO;
-            emptyView.frame = CGRectMake(0, self.bounds.origin.y, self.frame.size.width, self.frame.size.height);
+            
+            // 是否忽略contentInset
+            BOOL ignoreContentInset = [self.dataSetDelegate respondsToSelector:@selector(ignoreContentInsetForEmptyDataSet:)] ? [self.dataSetDelegate ignoreContentInsetForEmptyDataSet:self] : YES;
+            
+            if (ignoreContentInset) {
+                emptyView.frame = CGRectMake(0, self.bounds.origin.y, self.frame.size.width, self.frame.size.height);
+            }
+            else
+            {
+                 emptyView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - self.contentInset.bottom - self.contentInset.top);
+            }
             if (emptyView.superview) {
                 [self bringSubviewToFront:emptyView];
             }
@@ -218,6 +230,11 @@ static char kDLEmptyDelegateKey;
                 [self addSubview:emptyView];
             }
         }
+        
+        
+        emptyView.userInteractionEnabled = [self.dataSetDelegate respondsToSelector:@selector
+                                              (enableUserInteractionForEmptyDataSet:)] ?
+                         [self.dataSetDelegate enableUserInteractionForEmptyDataSet:self] : NO;
     }
     else
     {
@@ -231,7 +248,11 @@ static char kDLEmptyDelegateKey;
 {
     id<UITableViewDataSource> dataSource = tableView.dataSource;
     BOOL isEmpty = YES;
-    NSUInteger section = [dataSource numberOfSectionsInTableView:(UITableView *)self];
+   
+    NSUInteger section  = 1;
+    if ([dataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]) {
+        section = [dataSource numberOfSectionsInTableView:(UITableView *)self];
+    }
     if (section == 0) {
         isEmpty = YES;
     }
@@ -246,6 +267,31 @@ static char kDLEmptyDelegateKey;
     }
     return isEmpty;
 }
+
+- (BOOL)dataSetIsEmptyWithCollectionView:(UICollectionView *)collectionView
+{
+    id<UICollectionViewDataSource> dataSource = collectionView.dataSource;
+    BOOL isEmpty = YES;
+    
+    NSUInteger section  = 1;
+    if ([dataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
+        section = [dataSource numberOfSectionsInCollectionView:(UICollectionView *)self];
+    }
+    if (section == 0) {
+        isEmpty = YES;
+    }
+    
+    for (NSUInteger i = 0; i < section; ++i) {
+        NSUInteger row = [dataSource collectionView:(UICollectionView *)self numberOfItemsInSection:i];
+        if (row != 0) {
+            // 不等于0 说明有数据。
+            isEmpty = NO;
+            break;
+        }
+    }
+    return isEmpty;
+}
+
 
 
 @end
