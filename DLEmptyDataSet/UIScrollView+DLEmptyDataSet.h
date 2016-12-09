@@ -105,6 +105,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadDataWithEmptyView:(BOOL)reloadData;
 
 
+/**
+ 显示空白视图
+
+ @param displayOrHidden 显示或者隐藏
+ */
+- (void)dl_displayEmptyView:(BOOL)displayOrHidden;
 @end
 
 
