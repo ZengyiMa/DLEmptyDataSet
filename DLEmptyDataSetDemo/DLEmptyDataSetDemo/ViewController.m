@@ -35,6 +35,10 @@
     UIBarButtonItem *emptyItem = [[UIBarButtonItem alloc]initWithTitle:@"清空" style:UIBarButtonItemStyleDone target:self action:@selector(empty)];
     self.navigationItem.leftBarButtonItem = addItem;
     self.navigationItem.rightBarButtonItem = emptyItem;
+    
+    
+    [self.tableView reloadDataWithEmptyView];
+    
 }
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
