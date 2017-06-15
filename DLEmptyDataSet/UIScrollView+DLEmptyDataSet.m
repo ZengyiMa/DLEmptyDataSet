@@ -222,6 +222,22 @@ static char kDLEmptyDelegateKey;
             {
                  emptyView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - self.contentInset.bottom - self.contentInset.top);
             }
+            
+            
+            UIEdgeInsets inset = UIEdgeInsetsZero;
+            if ([self.dataSetDelegate respondsToSelector:@selector(edgeInsetsForEmptyDataSet:)]) {
+                inset = [self.dataSetDelegate edgeInsetsForEmptyDataSet:self];
+            }
+            
+            CGRect frame = emptyView.frame;
+            frame.origin.x += inset.left;
+            frame.origin.y += inset.top;
+            frame.size.height -= inset.bottom;
+            frame.size.width -= inset.right;
+            emptyView.frame = frame;
+            
+            
+            
             if (emptyView.superview) {
                 [self bringSubviewToFront:emptyView];
             }
@@ -229,6 +245,9 @@ static char kDLEmptyDelegateKey;
             {
                 [self addSubview:emptyView];
             }
+            
+            // 设置颜色
+            emptyView.backgroundColor = [self.dataSetDelegate respondsToSelector:@selector(backgroundColorForEmptyDataSet:)] ? [self.dataSetDelegate backgroundColorForEmptyDataSet:self] : [UIColor clearColor];
         }
         
         

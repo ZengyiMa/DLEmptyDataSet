@@ -93,6 +93,23 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)ignoreContentInsetForEmptyDataSet:(UIScrollView *)scrollView;
 
+/**
+ 为空白视图设置颜色
+ 
+ @param scrollView 当前的 scrollView
+ @return 颜色
+ */
+- (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView;
+
+
+/**
+ 给空白视图添加 inset 距离 默认是 zero
+
+ @param scrollView 当前的 scrollView
+ @return inset
+ */
+- (UIEdgeInsets)edgeInsetsForEmptyDataSet:(UIScrollView *)scrollView;
+
 @end
 
 
